@@ -920,6 +920,22 @@ const FieldParse InGameUI::s_fieldParseTable[] =
 //-------------------------------------------------------------------------------------------------
 void INI::parseInGameUIDefinition( INI* ini )
 {
+	// Prevent map.ini files from overriding InGameUI settings to avoid UI manipulation exploits
+	if( ini->getLoadType() == INI_LOAD_CREATE_OVERRIDES )
+	{
+		Bool done = FALSE;
+		while( !done && !ini->isEOF() )
+		{
+			ini->readLine();
+			const char* token = strtok( ini->m_buffer, ini->m_seps );
+			if( token && stricmp( token, "End" ) == 0 )
+			{
+				done = TRUE;
+			}
+		}
+		return;
+	}
+
 	if( TheInGameUI )
 	{
 		// parse the ini weapon definition
